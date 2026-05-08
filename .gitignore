@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# environment variables
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# build
+dist/
+build/
+
+# uploads
+uploads/
+
+# OS files
+.DS_Store
+
+
+# vscode
+.vscode/
+
+# coverage
+coverage/
+
+# docker volumes
+postgres_data/
