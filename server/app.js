@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import dotenv from 'dotenv';
 import ApiError from './src/utils/ApiError.js';
 import errorHandler from './src/middleware/errorHandler.js';
+import authRoutes from "./src/routes/auth.routes.js";
 
 dotenv.config();
 
@@ -25,7 +26,8 @@ app.get('/health', async (req, res) => {
 });
 
 
-// ── Routes go here as we build them ──────────────────────────
+// Routes
+app.use('/api/auth', authRoutes);
 
 
 
