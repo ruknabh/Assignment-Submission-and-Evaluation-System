@@ -52,16 +52,25 @@ ases/
 │   │   │
 │   │   ├── config/
 │   │   │   ├── db.js                  # PostgreSQL connection pool
-│   │   │   ├── initDb.js              # Initialize Database
+│   │   │   └── initDb.js              # Initialize database schema
 │   │   │
 │   │   ├── controllers/               # Request controllers
-│   │   ├── middleware/                # Express middleware
-│   │   ├── queries/                   # Raw SQL queries
-|   |   |   └── schema.sql             
-|   |   |
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── authenticate.js        # Verify JWT token
+│   │   │   ├── errorHandler.js        # Global error handler
+│   │   │   └── requireRole.js         # Role-based access control(RBAC)
+│   │   │
+│   │   ├── queries/
+│   │   │   └── schema.sql             # Database schema
+│   │   │
 │   │   ├── routes/                    # API routes
 │   │   ├── services/                  # Business logic layer
-│   │   ├── utils/                     # Helper functions
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── ApiError.js            # Custom error class
+│   │   │   └── asyncHandler.js        # Async wrapper for controllers
+│   │   │
 │   │   └── validators/                # Request validation logic
 │   │
 │   ├── uploads/
