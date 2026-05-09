@@ -51,11 +51,14 @@ ases/
 │   ├── src/
 │   │   │
 │   │   ├── config/
-│   │   │   └── db.js                  # PostgreSQL connection pool
+│   │   │   ├── db.js                  # PostgreSQL connection pool
+│   │   │   ├── initDb.js              # Initialize Database
 │   │   │
 │   │   ├── controllers/               # Request controllers
 │   │   ├── middleware/                # Express middleware
 │   │   ├── queries/                   # Raw SQL queries
+|   |   |   └── schema.sql             
+|   |   |
 │   │   ├── routes/                    # API routes
 │   │   ├── services/                  # Business logic layer
 │   │   ├── utils/                     # Helper functions
