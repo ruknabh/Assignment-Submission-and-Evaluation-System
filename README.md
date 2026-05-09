@@ -54,32 +54,37 @@ ases/
 │   │   │   ├── db.js                  # PostgreSQL connection pool
 │   │   │   └── initDb.js              # Initialize database schema
 │   │   │
-│   │   ├── controllers/               # Request controllers
+│   │   ├── controllers/
+│   │   │   └── auth.controller.js     # Register, login, getMe logic
 │   │   │
 │   │   ├── middleware/
-│   │   │   ├── authenticate.js        # Verify JWT token
+│   │   │   ├── authenticate.js        # Verify JWT, attach req.user
 │   │   │   ├── errorHandler.js        # Global error handler
-│   │   │   └── requireRole.js         # Role-based access control(RBAC)
+│   │   │   └── requireRole.js         # Role-based access control (RBAC)
 │   │   │
 │   │   ├── queries/
-│   │   │   └── schema.sql             # Database schema
+│   │   │   ├── schema.sql             # Database schema & table definitions
+│   │   │   └── auth.queries.js        # SQL queries for auth operations
 │   │   │
-│   │   ├── routes/                    # API routes
+│   │   ├── routes/
+│   │   │   └── auth.routes.js         # Auth endpoints (register, login, me)
+│   │   │
 │   │   ├── services/                  # Business logic layer
 │   │   │
 │   │   ├── utils/
-│   │   │   ├── ApiError.js            # Custom error class
-│   │   │   └── asyncHandler.js        # Async wrapper for controllers
+│   │   │   ├── ApiError.js            # Custom error class with status code
+│   │   │   └── asyncHandler.js        # Async wrapper, eliminates try/catch
 │   │   │
-│   │   └── validators/                # Request validation logic
+│   │   └── validators/
+│   │       └── auth.validator.js      # Zod schemas for register & login
 │   │
 │   ├── uploads/
 │   │   └── submissions/               # Uploaded assignment files
 │   │
 │   ├── .env
 │   ├── .gitignore
-│   ├── app.js                         # Express app configuration
-│   ├── index.js                       # Server entry point
+│   ├── app.js                         # Express app, middleware & route mounting
+│   ├── index.js                       # Server entry point, DB connect & listen
 │   ├── package.json
 │   └── package-lock.json
 │
