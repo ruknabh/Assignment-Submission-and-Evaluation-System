@@ -56,7 +56,8 @@ ases/
 │   │   │
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.js     # Register, login, getMe logic
-│   │   │   └── course.controller.js
+│   │   │   ├── course.controller.js
+|   |   |   └── enrollment.controller.js
 |   |   |
 │   │   ├── middleware/
 │   │   │   ├── authenticate.js        # Verify JWT, attach req.user
@@ -66,11 +67,13 @@ ases/
 │   │   ├── queries/
 │   │   │   ├── schema.sql             # Database schema & table definitions
 │   │   │   ├── auth.queries.js        # SQL queries for auth operations
-│   │   │   └── course.queries.js
+│   │   │   ├── course.queries.js
+|   |   |   └── enrollment.queries.js
 |   |   |
 │   │   ├── routes/
 │   │   │   ├── auth.routes.js         # Auth endpoints (register, login, me)
-│   │   │   └── course.routes.js
+│   │   │   ├── course.routes.js
+|   |   |   └── enrollment.routes.js
 |   |   | 
 │   │   ├── services/                  # Business logic layer
 │   │   │
@@ -80,7 +83,8 @@ ases/
 │   │   │
 │   │   └── validators/
 │   │       ├── auth.validator.js      # Zod schemas for register & login
-│   │       └── course.validator.js
+│   │       ├── course.validator.js
+|   |       └── enrollment.validator.js
 |   | 
 │   ├── uploads/
 │   │   └── submissions/               # Uploaded assignment files

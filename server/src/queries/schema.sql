@@ -11,7 +11,7 @@ EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
 DO $$ BEGIN
-  CREATE TYPE enrollment_status AS ENUM ('active', 'withdrawn', 'completed');
+  CREATE TYPE enrollment_status AS ENUM ('pending', 'active', 'withdrawn', 'completed', 'rejected');
 EXCEPTION WHEN duplicate_object THEN NULL;
 END $$;
 
