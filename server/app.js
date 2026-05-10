@@ -8,6 +8,7 @@ import authRoutes from "./src/routes/auth.routes.js";
 import courseRoutes from "./src/routes/course.routes.js";
 import enrollmentRoutes from "./src/routes/enrollment.routes.js"
 import assignmentRoutes from "./src/routes/assignment.routes.js"
+import submissionRoutes from "./src/routes/submission.routes.js"
 
 dotenv.config();
 
@@ -34,7 +35,7 @@ app.use('/api/auth', authRoutes);                // auth route
 app.use('/api/courses', courseRoutes);           // course route
 app.use('/api/enrollments', enrollmentRoutes);   // enrollment route
 app.use('/api/assignments', assignmentRoutes);   // assignment route
-
+app.use('/api/submissions', submissionRoutes);   // submission route
 
 
 // 404 — catches any request that didn't match a route above

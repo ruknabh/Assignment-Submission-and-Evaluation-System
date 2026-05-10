@@ -52,13 +52,18 @@ ases/
 │   │   │
 │   │   ├── config/
 │   │   │   ├── db.js                  # PostgreSQL connection pool
-│   │   │   └── initDb.js              # Initialize database schema
-│   │   │
+│   │   │   ├── initDb.js              # Initialize database schema
+|   |   |   ├── seed.js                # Dev only, seeds admin user
+│   │   │   ├── multer.js              # File upload config
+|   |   |   └── storage.js             # File save/delete/resolve
+|   |   |
+|   |   |
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.js     # Register, login, getMe logic
 │   │   │   ├── course.controller.js
 |   |   |   ├── enrollment.controller.js
-|   |   |   └── assignment.controller.js
+|   |   |   ├── assignment.controller.js
+|   |   |   └── submission.controller.js
 |   |   |
 │   │   ├── middleware/
 │   │   │   ├── authenticate.js        # Verify JWT, attach req.user
@@ -70,14 +75,16 @@ ases/
 │   │   │   ├── auth.queries.js        # SQL queries for auth operations
 │   │   │   ├── course.queries.js
 |   |   |   ├── enrollment.queries.js
-|   |   |   └── assignment.queries.js
-|   |   |   
+|   |   |   ├── assignment.queries.js
+|   |   |   └── submission.queries.js
+|   |   |     
 │   │   ├── routes/
 │   │   │   ├── auth.routes.js         # Auth endpoints (register, login, me)
 │   │   │   ├── course.routes.js
 |   |   |   ├── enrollment.routes.js
-|   |   |   └── assignment.routes.js
-|   |   | 
+|   |   |   ├── assignment.routes.js
+|   |   |   └── submission.routes.js
+|   |   |   
 │   │   ├── services/                  # Business logic layer
 │   │   │
 │   │   ├── utils/
@@ -88,8 +95,9 @@ ases/
 │   │       ├── auth.validator.js      # Zod schemas for register & login
 │   │       ├── course.validator.js
 |   |       ├── enrollment.validator.js
-|   |       └── assignment.validator.js
-|   |     
+|   |       ├── assignment.validator.js
+|   |       └── submission.validator.js
+|   |        
 │   ├── uploads/
 │   │   └── submissions/               # Uploaded assignment files
 │   │

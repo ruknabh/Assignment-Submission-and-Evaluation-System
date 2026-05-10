@@ -9,6 +9,13 @@ import {
 } from '../controllers/assignment.controller.js';
 import authenticate from '../middleware/authenticate.js';
 import requireRole from '../middleware/requireRole.js';
+import {
+  submitAssignment,
+  getSubmissionsByAssignmentHandler,
+} from '../controllers/submission.controller.js';
+import upload from '../config/multer.js';
+
+
 
 const router = Router();
 
@@ -26,5 +33,25 @@ router.patch('/:id', requireRole('teacher', 'admin'), updateAssignmentHandler);
 
 // DELETE /api/assignments/:id — teacher (own course) and admin
 router.delete('/:id', requireRole('teacher', 'admin'), deleteAssignmentHandler);
+
+
+
+// Nested routes
+
+// POST /api/assignments/:assignmentId/submit  — student submits file
+router.post(
+  '/:assignmentId/submit',
+  requireRole('student'),
+  upload.single('file'),   // 'file' is the form-data field name
+  submitAssignment
+);
+
+// GET /api/assignments/:assignmentId/submissions — teacher/admin lists all submissions
+router.get(
+  '/:assignmentId/submissions',
+  requireRole('teacher', 'admin'),
+  getSubmissionsByAssignmentHandler
+);
+
 
 export default router;

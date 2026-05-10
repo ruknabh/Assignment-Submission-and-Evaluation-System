@@ -15,6 +15,21 @@ const errorHandler = (err, req, res, next) => {
     });
   }
 
+  // Multer errors — file upload issues
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(422).json({
+      success: false,
+      message: 'File size exceeds the maximum allowed limit',
+    });
+  }
+
+  if (err.message === 'Unexpected end of form') {
+    return res.status(400).json({
+      success: false,
+      message: 'No file received — make sure you are sending multipart/form-data with a file attached',
+    });
+  }
+
   // PostgreSQL: unique constraint violation
   if (err.code === '23505') {
     return res.status(409).json({
