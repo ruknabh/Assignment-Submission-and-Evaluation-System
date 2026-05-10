@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import ApiError from './src/utils/ApiError.js';
 import errorHandler from './src/middleware/errorHandler.js';
 import authRoutes from "./src/routes/auth.routes.js";
+import courseRoutes from "./src/routes/course.routes.js";
 
 dotenv.config();
 
@@ -27,8 +28,8 @@ app.get('/health', async (req, res) => {
 
 
 // Routes
-app.use('/api/auth', authRoutes);
-
+app.use('/api/auth', authRoutes);             // auth route
+app.use('/api/courses', courseRoutes);        // course route
 
 
 // 404 — catches any request that didn't match a route above

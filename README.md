@@ -55,8 +55,9 @@ ases/
 │   │   │   └── initDb.js              # Initialize database schema
 │   │   │
 │   │   ├── controllers/
-│   │   │   └── auth.controller.js     # Register, login, getMe logic
-│   │   │
+│   │   │   ├── auth.controller.js     # Register, login, getMe logic
+│   │   │   └── course.controller.js
+|   |   |
 │   │   ├── middleware/
 │   │   │   ├── authenticate.js        # Verify JWT, attach req.user
 │   │   │   ├── errorHandler.js        # Global error handler
@@ -64,11 +65,13 @@ ases/
 │   │   │
 │   │   ├── queries/
 │   │   │   ├── schema.sql             # Database schema & table definitions
-│   │   │   └── auth.queries.js        # SQL queries for auth operations
-│   │   │
+│   │   │   ├── auth.queries.js        # SQL queries for auth operations
+│   │   │   └── course.queries.js
+|   |   |
 │   │   ├── routes/
-│   │   │   └── auth.routes.js         # Auth endpoints (register, login, me)
-│   │   │
+│   │   │   ├── auth.routes.js         # Auth endpoints (register, login, me)
+│   │   │   └── course.routes.js
+|   |   | 
 │   │   ├── services/                  # Business logic layer
 │   │   │
 │   │   ├── utils/
@@ -76,8 +79,9 @@ ases/
 │   │   │   └── asyncHandler.js        # Async wrapper, eliminates try/catch
 │   │   │
 │   │   └── validators/
-│   │       └── auth.validator.js      # Zod schemas for register & login
-│   │
+│   │       ├── auth.validator.js      # Zod schemas for register & login
+│   │       └── course.validator.js
+|   | 
 │   ├── uploads/
 │   │   └── submissions/               # Uploaded assignment files
 │   │
