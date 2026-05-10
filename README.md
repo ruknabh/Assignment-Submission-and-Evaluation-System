@@ -63,7 +63,8 @@ ases/
 │   │   │   ├── course.controller.js
 |   |   |   ├── enrollment.controller.js
 |   |   |   ├── assignment.controller.js
-|   |   |   └── submission.controller.js
+|   |   |   ├── submission.controller.js
+|   |   |   └── evaluation.controller.js
 |   |   |
 │   │   ├── middleware/
 │   │   │   ├── authenticate.js        # Verify JWT, attach req.user
@@ -76,15 +77,17 @@ ases/
 │   │   │   ├── course.queries.js
 |   |   |   ├── enrollment.queries.js
 |   |   |   ├── assignment.queries.js
-|   |   |   └── submission.queries.js
+|   |   |   ├── submission.queries.js
+|   |   |   └── evaluation.queries.js
 |   |   |     
 │   │   ├── routes/
 │   │   │   ├── auth.routes.js         # Auth endpoints (register, login, me)
 │   │   │   ├── course.routes.js
 |   |   |   ├── enrollment.routes.js
 |   |   |   ├── assignment.routes.js
-|   |   |   └── submission.routes.js
-|   |   |   
+|   |   |   ├── submission.routes.js
+|   |   |   └── evaluation.routes.js
+|   |   |    
 │   │   ├── services/                  # Business logic layer
 │   │   │
 │   │   ├── utils/
@@ -96,8 +99,9 @@ ases/
 │   │       ├── course.validator.js
 |   |       ├── enrollment.validator.js
 |   |       ├── assignment.validator.js
-|   |       └── submission.validator.js
-|   |        
+|   |       ├── submission.validator.js
+|   |       └── evaluation.validator.js
+|   |         
 │   ├── uploads/
 │   │   └── submissions/               # Uploaded assignment files
 │   │
