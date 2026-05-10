@@ -8,6 +8,10 @@ import {
 } from '../controllers/course.controller.js';
 import authenticate from '../middleware/authenticate.js';
 import requireRole from '../middleware/requireRole.js';
+import {
+  createAssignmentHandler,
+  getAssignmentsByCourseHandler,
+} from "../controllers/assignment.controller.js"
 
 const router = Router();
 
@@ -28,5 +32,11 @@ router.patch('/:id', requireRole('teacher', 'admin'), updateCourseHandler);
 
 // DELETE /api/courses/:id — admin only
 router.delete('/:id', requireRole('admin'), deleteCourseHandler);
+
+
+// Nested assignment routes under a course
+router.post(  '/:courseId/assignments', requireRole('teacher', 'admin'), createAssignmentHandler);
+router.get(   '/:courseId/assignments', getAssignmentsByCourseHandler);
+
 
 export default router;
