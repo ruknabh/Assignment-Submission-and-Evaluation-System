@@ -29,5 +29,27 @@ export const createUser = async ({ full_name, email, username, password_hash, ro
      RETURNING id, full_name, email, username, role, created_at`,
     [full_name, email, username, password_hash, role]
   );
+
+// Get all users — admin only, used for enrollment management UI
+export const getAllUsers = async () => {
+  const result = await pool.query(
+    `SELECT id, full_name, email, username, role, created_at
+     FROM users
+     ORDER BY created_at DESC`
+  );
+  return result.rows;
+};
+
+// Get all students — admin uses this to pick who to enroll
+export const getAllStudents = async () => {
+  const result = await pool.query(
+    `SELECT id, full_name, email, username, created_at
+     FROM users
+     WHERE role = 'student'
+     ORDER BY full_name ASC`
+  );
+  return result.rows;
+};
+
   return result.rows[0];
 };

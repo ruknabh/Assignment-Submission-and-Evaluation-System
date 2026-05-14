@@ -116,3 +116,16 @@ export const getMe = asyncHandler(async (req, res) => {
     user: safeUser(user),
   });
 });
+
+
+// GET /api/auth/users — admin only
+export const getAllUsersHandler = asyncHandler(async (req, res) => {
+  const users = await getAllUsers();
+  res.status(200).json({ success: true, count: users.length, users });
+});
+
+// GET /api/auth/students — admin only, for enrollment dropdown
+export const getAllStudentsHandler = asyncHandler(async (req, res) => {
+  const students = await getAllStudents();
+  res.status(200).json({ success: true, count: students.length, students });
+});
