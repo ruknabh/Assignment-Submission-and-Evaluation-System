@@ -22,19 +22,62 @@ ases/
 │   │
 │   ├── src/
 │   │   │
-│   │   ├── api/                       # Axios instances & API handlers
-│   │   ├── components/                # Reusable UI components
-│   │   ├── context/                   # React Context API
-│   │   ├── hooks/                     # Custom React hooks
-│   │   ├── layouts/                   # Layout wrappers
-│   │   ├── pages/                     # Application pages
-│   │   ├── routes/                    # Route management
-│   │   ├── styles/                    # Global styling
-│   │   ├── utils/                     # Utility/helper functions
-│   │   │
-│   │   ├── App.jsx
-│   │   ├── index.css
-│   │   └── main.jsx
+│   │   ├── api/
+│   |   |   ├── axios.js              ← single axios instance, token auto-injected 
+│   |   |   ├── auth.api.js           ← login, register, getMe, users 
+│   |   |   ├── course.api.js         ← CRUD courses 
+│   |   |   ├── enrollment.api.js     ← request, approve, reject, direct enroll 
+│   |   |   ├── assignment.api.js     ← CRUD assignments 
+│   |   |   ├── submission.api.js     ← submit file, list, download 
+│   |   |   └── evaluation.api.js     ← grade, return, view grades  
+|   |   |                    
+│   │   ├── context/
+│   |   |   └── AuthContext.jsx       ← user state, login/logout, token in localStorage      
+|   |   |      
+|   |   |                   
+│   │   ├── hooks/
+|   |   |   ├── useAuth.js            ← consumes AuthContext cleanly
+|   |   |   └── useCourse.js          ← course data fetching hook    
+|   |   |
+│   │   ├── layouts/
+│   |   |   ├── StudentLayout.jsx     ← sidebar + navbar wrapper for student pages
+│   |   |   ├── TeacherLayout.jsx     ← sidebar + navbar wrapper for teacher pages
+│   |   |   └── AdminLayout.jsx       ← sidebar + navbar wrapper for admin pages 
+│   |   |           
+│   │   ├── pages/
+│   |   |   ├── auth/
+│   |   |   │   ├── Login.jsx
+│   |   |   │   └── Register.jsx
+|   |   |   |   
+│   |   |   ├── student/
+│   |   |   │   ├── Dashboard.jsx          ← enrolled courses list
+│   |   |   │   ├── CourseView.jsx         ← assignments inside a course
+│   |   |   │   └── SubmitAssignment.jsx   ← file upload page
+|   |   |   |
+│   |   |   ├── teacher/
+│   |   |   │   ├── Dashboard.jsx          ← teacher's courses
+│   |   |   │   ├── CourseManage.jsx       ← edit course, view enrollments
+│   |   |   │   ├── AssignmentCreate.jsx   ← create and edit assignments
+│   |   |   │   ├── SubmissionsList.jsx    ← all submissions for assignment
+│   |   |   │   ├── EvaluationView.jsx     ← grade one submission
+│   |   |   │   └── Analytics.jsx          ← grade distribution, late count
+│   |   |   |   
+│   |   |   └── admin/
+│   |   |       ├── Dashboard.jsx          ← system overview stats
+│   |   |       └── EnrollmentManager.jsx  ← enroll students directly     
+|   |   |                   
+│   |   ├── routes/
+│   |   |   ├── AppRouter.jsx         ← every route defined in one place
+│   |   |   └── ProtectedRoute.jsx    ← blocks wrong role or unauthenticated users
+|   |   |
+|   |   ├── styles/
+|   |   |   └── index.css             ← Tailwind entry 
+|   |   |                  
+│   |   ├── utils/                     
+│   |   │   └── helpers.js            ← formatDate, formatFileSize, getInitials
+|   |   |
+│   |   ├── App.jsx
+│   |   └── main.jsx
 │   │
 │   ├── .env
 │   ├── .gitignore
@@ -42,7 +85,6 @@ ases/
 │   ├── index.html
 │   ├── package.json
 │   ├── package-lock.json
-│   ├── README.md
 │   └── vite.config.js
 │
 │

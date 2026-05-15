@@ -9,6 +9,7 @@ export const findUserByEmail = async (email) => {
      WHERE email = $1`,
     [email]
   );
+
   return result.rows[0] || null;
 };
 
@@ -18,17 +19,27 @@ export const findUserByUsername = async (username) => {
     `SELECT id FROM users WHERE username = $1`,
     [username]
   );
+
   return result.rows[0] || null;
 };
 
 // Create a new user — returns the created user without password_hash
-export const createUser = async ({ full_name, email, username, password_hash, role }) => {
+export const createUser = async ({
+  full_name,
+  email,
+  username,
+  password_hash,
+  role,
+}) => {
   const result = await pool.query(
     `INSERT INTO users (full_name, email, username, password_hash, role)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING id, full_name, email, username, role, created_at`,
     [full_name, email, username, password_hash, role]
   );
+
+  return result.rows[0];
+};
 
 // Get all users — admin only, used for enrollment management UI
 export const getAllUsers = async () => {
@@ -37,6 +48,7 @@ export const getAllUsers = async () => {
      FROM users
      ORDER BY created_at DESC`
   );
+
   return result.rows;
 };
 
@@ -48,8 +60,6 @@ export const getAllStudents = async () => {
      WHERE role = 'student'
      ORDER BY full_name ASC`
   );
-  return result.rows;
-};
 
-  return result.rows[0];
+  return result.rows;
 };
