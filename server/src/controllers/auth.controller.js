@@ -1,7 +1,13 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { registerSchema, loginSchema } from '../validators/auth.validator.js';
-import { findUserByEmail, findUserByUsername, createUser } from '../queries/auth.queries.js';
+import {
+  findUserByEmail,
+  findUserByUsername,
+  createUser,
+  getAllUsers,
+  getAllStudents,
+} from '../queries/auth.queries.js';
 import ApiError from '../utils/ApiError.js';
 import asyncHandler from '../utils/asyncHandler.js';
 

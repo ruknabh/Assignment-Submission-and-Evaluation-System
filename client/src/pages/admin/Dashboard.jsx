@@ -112,18 +112,7 @@ const AdminDashboard = () => {
           <h1 className="text-2xl font-semibold text-gray-950">Admin Dashboard</h1>
           <p className="text-sm text-gray-500 mt-1">System overview</p>
         </div>
-        <button
-          onClick={() => navigate('/admin/enrollments')}
-          className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700
-            text-white text-sm font-medium rounded-lg px-4 py-2.5 transition-colors
-            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-          Manage Enrollments
-        </button>
+        
       </div>
 
       {/* Stat cards */}
