@@ -1,7 +1,7 @@
-import { useEffect, useState, useMemo } from 'react';
-import toast                            from 'react-hot-toast';
-import { getAllStudentsApi }             from '../../api/auth.api.js';
-import { getCoursesApi }                from '../../api/course.api.js';
+import { useEffect, useState, useMemo, useRef } from 'react';
+import toast                                     from 'react-hot-toast';
+import { getAllStudentsApi }                      from '../../api/auth.api.js';
+import { getCoursesApi }                         from '../../api/course.api.js';
 import {
   getEnrollmentsApi,
   directEnrollApi,
@@ -11,7 +11,6 @@ import {
 } from '../../api/enrollment.api.js';
 import { formatDate } from '../../utils/helpers.js';
 
-// Status pill
 const StatusPill = ({ status }) => {
   const config = {
     active:    'bg-green-100 text-green-700',
@@ -21,21 +20,37 @@ const StatusPill = ({ status }) => {
     completed: 'bg-blue-100  text-blue-700',
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-      ${config[status] || config.pending}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full
+      text-xs font-medium ${config[status] || config.pending}`}>
       {status.charAt(0).toUpperCase() + status.slice(1)}
     </span>
   );
 };
 
-// Searchable select component — used for student and course dropdowns
+// Fixed SearchableSelect:
+// 1. Click-outside closes dropdown
+// 2. Options filtered from stable memoized prop — no stale results
 const SearchableSelect = ({ options, value, onChange, placeholder, labelKey, valueKey }) => {
-  const [query,    setQuery]    = useState('');
-  const [isOpen,   setIsOpen]   = useState(false);
+  const [query,  setQuery]  = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef(null);
 
-  const filtered = useMemo(() =>
-    options.filter((o) =>
-      o[labelKey]?.toLowerCase().includes(query.toLowerCase())
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setIsOpen(false);
+        setQuery('');
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Stable filter — options prop is memoized in parent so no false cache misses
+  const filtered = useMemo(
+    () => options.filter((o) =>
+      String(o[labelKey] ?? '').toLowerCase().includes(query.toLowerCase())
     ),
     [options, query, labelKey]
   );
@@ -43,7 +58,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder, labelKey, val
   const selected = options.find((o) => o[valueKey] === value);
 
   return (
-    <div className="relative">
+    <div className="relative" ref={ref}>
       <button
         type="button"
         onClick={() => setIsOpen((p) => !p)}
@@ -54,16 +69,19 @@ const SearchableSelect = ({ options, value, onChange, placeholder, labelKey, val
         <span className={selected ? 'text-gray-950' : 'text-gray-400'}>
           {selected ? selected[labelKey] : placeholder}
         </span>
-        <svg className={`w-4 h-4 text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+        <svg
+          className={`w-4 h-4 text-gray-400 transition-transform shrink-0
+            ${isOpen ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+            d="M19 9l-7 7-7-7"/>
         </svg>
       </button>
 
       {isOpen && (
         <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200
           rounded-xl shadow-lg overflow-hidden">
-          {/* Search input */}
           <div className="p-2 border-b border-gray-100">
             <input
               type="text"
@@ -75,11 +93,11 @@ const SearchableSelect = ({ options, value, onChange, placeholder, labelKey, val
                 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
-
-          {/* Options list */}
           <div className="max-h-48 overflow-y-auto">
             {filtered.length === 0 ? (
-              <p className="text-sm text-gray-400 text-center py-4">No results found</p>
+              <p className="text-sm text-gray-400 text-center py-4">
+                No results found
+              </p>
             ) : (
               filtered.map((option) => (
                 <button
@@ -92,7 +110,9 @@ const SearchableSelect = ({ options, value, onChange, placeholder, labelKey, val
                   }}
                   className={`w-full text-left px-4 py-2.5 text-sm transition-colors
                     hover:bg-blue-50 hover:text-blue-700
-                    ${option[valueKey] === value ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'}`}
+                    ${option[valueKey] === value
+                      ? 'bg-blue-50 text-blue-700 font-medium'
+                      : 'text-gray-700'}`}
                 >
                   {option[labelKey]}
                 </button>
@@ -127,10 +147,10 @@ const EnrollmentManager = () => {
           getCoursesApi(),
           getEnrollmentsApi(),
         ]);
-        setStudents(studRes.students       || []);
-        setCourses(courseRes.courses       || []);
+        setStudents(studRes.students         || []);
+        setCourses(courseRes.courses         || []);
         setEnrollments(enrollRes.enrollments || []);
-      } catch (err) {
+      } catch {
         toast.error('Failed to load data');
       } finally {
         setLoading(false);
@@ -139,16 +159,32 @@ const EnrollmentManager = () => {
     fetchAll();
   }, []);
 
-  // Direct enroll
+  // Memoized option arrays — stable references prevent SearchableSelect stale filter
+  const studentOptions = useMemo(
+    () => students.map((s) => ({
+      id:           s.id,
+      displayLabel: `${s.full_name} (${s.email})`,
+    })),
+    [students]
+  );
+
+  const courseOptions = useMemo(
+    () => courses.map((c) => ({
+      id:           c.id,
+      displayLabel: `${c.code} — ${c.name} (${c.semester})`,
+    })),
+    [courses]
+  );
+
   const handleEnroll = async () => {
     if (!selectedStudent) { toast.error('Please select a student'); return; }
     if (!selectedCourse)  { toast.error('Please select a course');  return; }
 
-    // Check already actively enrolled — prevent unnecessary API call
     const alreadyActive = enrollments.some(
-      (e) => e.student_id === selectedStudent &&
-             e.course_id  === selectedCourse  &&
-             e.status === 'active'
+      (e) =>
+        e.student_id === selectedStudent &&
+        e.course_id  === selectedCourse  &&
+        e.status     === 'active'
     );
     if (alreadyActive) {
       toast.error('This student is already enrolled in this course');
@@ -159,7 +195,6 @@ const EnrollmentManager = () => {
       setEnrolling(true);
       const res = await directEnrollApi(selectedStudent, selectedCourse);
       toast.success(res.message || 'Student enrolled successfully!');
-      // Refresh enrollments list
       const enrollRes = await getEnrollmentsApi();
       setEnrollments(enrollRes.enrollments || []);
       setSelectedStudent('');
@@ -171,65 +206,61 @@ const EnrollmentManager = () => {
     }
   };
 
-  // Approve enrollment
-  const handleApprove = async (enrollmentId) => {
+  const handleApprove = async (id) => {
     try {
-      await approveEnrollmentApi(enrollmentId);
+      await approveEnrollmentApi(id);
       toast.success('Enrollment approved');
       setEnrollments((prev) =>
-        prev.map((e) => e.id === enrollmentId ? { ...e, status: 'active' } : e)
+        prev.map((e) => e.id === id ? { ...e, status: 'active' } : e)
       );
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to approve');
     }
   };
 
-  // Reject enrollment
-  const handleReject = async (enrollmentId) => {
+  const handleReject = async (id) => {
     try {
-      await rejectEnrollmentApi(enrollmentId);
+      await rejectEnrollmentApi(id);
       toast.success('Enrollment rejected');
       setEnrollments((prev) =>
-        prev.map((e) => e.id === enrollmentId ? { ...e, status: 'rejected' } : e)
+        prev.map((e) => e.id === id ? { ...e, status: 'rejected' } : e)
       );
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to reject');
     }
   };
 
-  // Withdraw student
-  const handleWithdraw = async (enrollmentId) => {
+  const handleWithdraw = async (id) => {
     try {
-      await updateEnrollmentApi(enrollmentId, 'withdrawn');
+      await updateEnrollmentApi(id, 'withdrawn');
       toast.success('Student withdrawn');
       setEnrollments((prev) =>
-        prev.map((e) => e.id === enrollmentId ? { ...e, status: 'withdrawn' } : e)
+        prev.map((e) => e.id === id ? { ...e, status: 'withdrawn' } : e)
       );
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to withdraw');
     }
   };
 
-  // Filtered enrollments
-  const filtered = useMemo(() => {
-    return enrollments.filter((e) => {
-      const matchesCourse = filterCourse ? e.course_id === filterCourse : true;
-      const matchesStatus = filterStatus ? e.status   === filterStatus  : true;
-      return matchesCourse && matchesStatus;
-    });
-  }, [enrollments, filterCourse, filterStatus]);
+  const handleReEnroll = async (studentId, courseId) => {
+    try {
+      const res = await directEnrollApi(studentId, courseId);
+      toast.success('Student re-enrolled successfully');
+      const enrollRes = await getEnrollmentsApi();
+      setEnrollments(enrollRes.enrollments || []);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to re-enroll');
+    }
+  };
 
-  // Student label for searchable select
-  const studentOptions = students.map((s) => ({
-    ...s,
-    displayLabel: `${s.full_name} (${s.email})`,
-  }));
-
-  // Course label for searchable select
-  const courseOptions = courses.map((c) => ({
-    ...c,
-    displayLabel: `${c.code} — ${c.name} (${c.semester})`,
-  }));
+  const filtered = useMemo(() =>
+    enrollments.filter((e) => {
+      const matchCourse = filterCourse ? e.course_id === filterCourse : true;
+      const matchStatus = filterStatus ? e.status   === filterStatus  : true;
+      return matchCourse && matchStatus;
+    }),
+    [enrollments, filterCourse, filterStatus]
+  );
 
   if (loading) {
     return (
@@ -248,7 +279,6 @@ const EnrollmentManager = () => {
 
   return (
     <div>
-      {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-gray-950">Enrollment Manager</h1>
         <p className="text-sm text-gray-500 mt-1">
@@ -299,16 +329,16 @@ const EnrollmentManager = () => {
           disabled={enrolling || !selectedStudent || !selectedCourse}
           className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700
             disabled:bg-purple-300 disabled:cursor-not-allowed
-            text-white text-sm font-medium rounded-lg px-5 py-2.5
-            transition-colors focus:outline-none focus:ring-2
-            focus:ring-purple-500 focus:ring-offset-2"
+            text-white text-sm font-medium rounded-lg px-5 py-2.5 transition-colors
+            focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
         >
           {enrolling ? (
             <>
               <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10"
                   stroke="currentColor" strokeWidth="4"/>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                <path className="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8v8z"/>
               </svg>
               Enrolling...
             </>
@@ -327,7 +357,7 @@ const EnrollmentManager = () => {
       {/* Enrollments table */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
 
-        {/* Table header + filters */}
+        {/* Filters */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between
           gap-3 px-5 py-4 border-b border-gray-100">
           <div>
@@ -336,8 +366,6 @@ const EnrollmentManager = () => {
               {filtered.length} of {enrollments.length} shown
             </p>
           </div>
-
-          {/* Filters */}
           <div className="flex items-center gap-2">
             <select
               value={filterStatus}
@@ -383,7 +411,9 @@ const EnrollmentManager = () => {
         {filtered.length === 0 ? (
           <div className="flex items-center justify-center h-40">
             <p className="text-sm text-gray-400">
-              {enrollments.length === 0 ? 'No enrollments yet' : 'No results match your filters'}
+              {enrollments.length === 0
+                ? 'No enrollments yet'
+                : 'No results match your filters'}
             </p>
           </div>
         ) : (
@@ -404,7 +434,6 @@ const EnrollmentManager = () => {
                 {filtered.map((e) => (
                   <tr key={e.id} className="hover:bg-gray-50 transition-colors">
 
-                    {/* Student */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-full bg-green-100 flex items-center
@@ -412,74 +441,59 @@ const EnrollmentManager = () => {
                           {e.student_name?.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-gray-950">{e.student_name}</p>
+                          <p className="text-sm font-medium text-gray-950">
+                            {e.student_name}
+                          </p>
                           <p className="text-xs text-gray-400">{e.student_email}</p>
                         </div>
                       </div>
                     </td>
 
-                    {/* Course */}
                     <td className="px-5 py-4">
-                      <p className="text-sm font-medium text-gray-950">{e.course_name}</p>
+                      <p className="text-sm font-medium text-gray-950">
+                        {e.course_name}
+                      </p>
                       <p className="text-xs text-gray-400">{e.course_code}</p>
                     </td>
 
-                    {/* Enrolled on */}
                     <td className="px-5 py-4 text-sm text-gray-500 whitespace-nowrap">
                       {formatDate(e.enrolled_at)}
                     </td>
 
-                    {/* Status */}
                     <td className="px-5 py-4">
                       <StatusPill status={e.status} />
                     </td>
 
-                    {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         {e.status === 'pending' && (
                           <>
-                            <button
-                              onClick={() => handleApprove(e.id)}
+                            <button onClick={() => handleApprove(e.id)}
                               className="text-xs bg-green-600 hover:bg-green-700
-                                text-white rounded-lg px-2.5 py-1.5 transition-colors font-medium"
-                            >
+                                text-white rounded-lg px-2.5 py-1.5
+                                transition-colors font-medium">
                               Approve
                             </button>
-                            <button
-                              onClick={() => handleReject(e.id)}
+                            <button onClick={() => handleReject(e.id)}
                               className="text-xs border border-red-200 text-red-600
-                                hover:bg-red-50 rounded-lg px-2.5 py-1.5 transition-colors font-medium"
-                            >
+                                hover:bg-red-50 rounded-lg px-2.5 py-1.5
+                                transition-colors font-medium">
                               Reject
                             </button>
                           </>
                         )}
                         {e.status === 'active' && (
-                          <button
-                            onClick={() => handleWithdraw(e.id)}
+                          <button onClick={() => handleWithdraw(e.id)}
                             className="text-xs border border-gray-200 text-gray-500
-                              hover:bg-gray-50 rounded-lg px-2.5 py-1.5 transition-colors"
-                          >
+                              hover:bg-gray-50 rounded-lg px-2.5 py-1.5 transition-colors">
                             Withdraw
                           </button>
                         )}
                         {['withdrawn', 'rejected'].includes(e.status) && (
                           <button
-                            onClick={async () => {
-                              try {
-                                // Re-enroll via direct enroll — will update to active
-                                const res = await directEnrollApi(e.student_id, e.course_id);
-                                toast.success('Student re-enrolled successfully');
-                                const enrollRes = await getEnrollmentsApi();
-                                setEnrollments(enrollRes.enrollments || []);
-                              } catch (err) {
-                                toast.error(err.response?.data?.message || 'Failed to re-enroll');
-                              }
-                            }}
+                            onClick={() => handleReEnroll(e.student_id, e.course_id)}
                             className="text-xs border border-blue-200 text-blue-600
-                              hover:bg-blue-50 rounded-lg px-2.5 py-1.5 transition-colors"
-                          >
+                              hover:bg-blue-50 rounded-lg px-2.5 py-1.5 transition-colors">
                             Re-enroll
                           </button>
                         )}

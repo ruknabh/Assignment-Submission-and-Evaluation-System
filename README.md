@@ -31,6 +31,18 @@ ases/
 │   |   |   ├── submission.api.js     ← submit file, list, download 
 │   |   |   └── evaluation.api.js     ← grade, return, view grades  
 |   |   |                    
+|   |   |                       
+|   |   ├── components/                    
+|   |   |   ├── FileUploader.jsx                    
+|   |   |   ├── GradeForm.jsx                    
+|   |   |   ├── Icons.jsx                    
+|   |   |   ├── JoinCourseModel.jsx                    
+|   |   |   ├── Navbar.jsx                    
+|   |   |   ├── PlagiarismBadge.jsx                    
+|   |   |   ├── SidebarLink.jsx                    
+|   |   |   └── StatusBadge.jsx                    
+|   |   |                       
+|   |   |                    
 │   │   ├── context/
 │   |   |   └── AuthContext.jsx       ← user state, login/logout, token in localStorage      
 |   |   |      

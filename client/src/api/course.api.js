@@ -12,6 +12,12 @@ export const getCourseByIdApi = async (courseId) => {
   return res.data;
 };
 
+// Search courses by code — student uses this before requesting enrollment
+export const searchCourseByCodeApi = async (code) => {
+  const res = await api.get(`/courses/search?code=${encodeURIComponent(code)}`);
+  return res.data;
+};
+
 // Create course — teacher only
 export const createCourseApi = async (data) => {
   const res = await api.post('/courses', data);

@@ -80,8 +80,6 @@ const AppRouter = () => {
       >
         <Route path="dashboard"   element={<AdminDashboard />} />
         <Route path="enrollments" element={<EnrollmentManager />} />
-        <Route path="users"   element={<AdminDashboard />} />
-        <Route path="courses" element={<AdminDashboard />} />
       </Route>
 
       {/* Catch all */}

@@ -7,6 +7,7 @@ import {
   updateCourse,
   deleteCourse,
   checkEnrollment,
+  searchCoursesByCode,
 } from '../queries/course.queries.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/course.validator.js';
 import ApiError from '../utils/ApiError.js';
@@ -122,4 +123,16 @@ export const deleteCourseHandler = asyncHandler(async (req, res) => {
     success: true,
     message: 'Course deleted successfully',
   });
+});
+
+
+// GET /api/courses/search?code=CS301
+// All authenticated users — student uses to find course before requesting enrollment
+export const searchCoursesHandler = asyncHandler(async (req, res) => {
+  const { code } = req.query;
+  if (!code || code.trim().length < 2) {
+    throw new ApiError(400, 'Provide at least 2 characters for course code');
+  }
+  const courses = await searchCoursesByCode(code.trim());
+  res.status(200).json({ success: true, count: courses.length, courses });
 });

@@ -5,6 +5,7 @@ import {
   getCourseByIdHandler,
   updateCourseHandler,
   deleteCourseHandler,
+  searchCoursesHandler,
 } from '../controllers/course.controller.js';
 import authenticate from '../middleware/authenticate.js';
 import requireRole from '../middleware/requireRole.js';
@@ -21,6 +22,10 @@ router.use(authenticate);
 // GET /api/courses — all roles, returns role-filtered results
 router.get('/', getCoursesHandler);
 
+
+// IMPORTANT: /search must be before /:id
+router.get('/search', searchCoursesHandler);
+
 // GET /api/courses/:id — all roles, access-checked per role in controller
 router.get('/:id', getCourseByIdHandler);
 
@@ -35,8 +40,8 @@ router.delete('/:id', requireRole('admin'), deleteCourseHandler);
 
 
 // Nested assignment routes under a course
-router.post(  '/:courseId/assignments', requireRole('teacher', 'admin'), createAssignmentHandler);
-router.get(   '/:courseId/assignments', getAssignmentsByCourseHandler);
+router.post('/:courseId/assignments', requireRole('teacher', 'admin'), createAssignmentHandler);
+router.get('/:courseId/assignments', getAssignmentsByCourseHandler);
 
 
 export default router;

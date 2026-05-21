@@ -102,3 +102,18 @@ export const checkEnrollment = async (student_id, course_id) => {
   );
   return result.rows[0] || null;
 };
+
+// Search courses by code — used by student join course feature
+// Returns all courses matching the code (case-insensitive)
+export const searchCoursesByCode = async (code) => {
+  const result = await pool.query(
+    `SELECT c.id, c.code, c.name, c.semester, c.section, c.created_at,
+            u.id AS instructor_id, u.full_name AS instructor_name, u.email AS instructor_email
+     FROM courses c
+     JOIN users u ON c.instructor_id = u.id
+     WHERE UPPER(c.code) = UPPER($1)
+     ORDER BY c.created_at DESC`,
+    [code]
+  );
+  return result.rows;
+};
