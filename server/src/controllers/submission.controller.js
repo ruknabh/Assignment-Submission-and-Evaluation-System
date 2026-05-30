@@ -13,6 +13,7 @@ import {
 }                                    from '../queries/submission.queries.js';
 import { updateSubmissionSchema }    from '../validators/submission.validator.js';
 import { saveFile, deleteFile, resolveFilePath } from '../config/storage.js';
+import { checkAssignmentPlagiarism } from '../services/plagiarism.service.js';
 import ApiError                      from '../utils/ApiError.js';
 import asyncHandler                  from '../utils/asyncHandler.js';
 
@@ -287,5 +288,52 @@ export const deleteSubmissionHandler = asyncHandler(async (req, res) => {
   res.status(200).json({
     success: true,
     message: 'Submission deleted successfully',
+  });
+});
+
+
+
+// POST /api/assignments/:assignmentId/plagiarism-check
+// Teacher (own course) and admin only
+// Reads all submission files for an assignment and returns similarity scores
+export const checkPlagiarismHandler = asyncHandler(async (req, res) => {
+  const { assignmentId } = req.params;
+
+  // 1. Verify assignment exists
+  const assignment = await getAssignmentById(assignmentId);
+  if (!assignment) throw new ApiError(404, 'Assignment not found');
+
+  // 2. Teacher can only check their own courses
+  if (req.user.role === 'teacher' && assignment.instructor_id !== req.user.id) {
+    throw new ApiError(403, 'You do not have access to this assignment');
+  }
+
+  // 3. Get all submissions for this assignment
+  const submissions = await getSubmissionsByAssignment(assignmentId);
+
+  if (submissions.length < 2) {
+    return res.status(200).json({
+      success: true,
+      message: 'Need at least 2 submissions to check plagiarism',
+      results: [],
+    });
+  }
+
+  // 4. Resolve absolute file paths for each submission
+  const submissionsWithPaths = submissions.map((s) => ({
+    id:         s.id,
+    student_id: s.student_id,
+    file_path:  resolveFilePath(s.file_path),
+  }));
+
+  // 5. Run plagiarism check — pure in-memory, no external API
+  const results = checkAssignmentPlagiarism(submissionsWithPaths);
+
+  res.status(200).json({
+    success: true,
+    assignment_id:    assignmentId,
+    total_checked:    results.filter((r) => !r.skipped).length,
+    total_skipped:    results.filter((r) =>  r.skipped).length,
+    results,
   });
 });

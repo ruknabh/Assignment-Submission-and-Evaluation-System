@@ -26,6 +26,13 @@ export const submitAssignmentApi = async (assignmentId, formData) => {
   return res.data;
 };
 
+// Run plagiarism check for all submissions of an assignment
+// Returns similarity scores — teacher/admin only
+export const checkPlagiarismApi = async (assignmentId) => {
+  const res = await api.post(`/assignments/${assignmentId}/plagiarism-check`);
+  return res.data;
+};
+
 // Download submission file
 export const getSubmissionFileUrl = (submissionId) => {
   return `${import.meta.env.VITE_API_URL}/submissions/${submissionId}/file`;

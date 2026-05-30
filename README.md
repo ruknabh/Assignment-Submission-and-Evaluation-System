@@ -33,10 +33,12 @@ ases/
 |   |   |                    
 |   |   |                       
 |   |   ├── components/                    
+|   |   |   ├── EmptyState.jsx                    
 |   |   |   ├── FileUploader.jsx                    
 |   |   |   ├── GradeForm.jsx                    
 |   |   |   ├── Icons.jsx                    
 |   |   |   ├── JoinCourseModel.jsx                    
+|   |   |   ├── LoadingSpinner.jsx                    
 |   |   |   ├── Navbar.jsx                    
 |   |   |   ├── PlagiarismBadge.jsx                    
 |   |   |   ├── SidebarLink.jsx                    
@@ -57,6 +59,9 @@ ases/
 │   |   |   └── AdminLayout.jsx       ← sidebar + navbar wrapper for admin pages 
 │   |   |           
 │   │   ├── pages/
+|   |   |   |   
+│   |   |   ├── NotFound.jsx
+|   |   |   |   
 │   |   |   ├── auth/
 │   |   |   │   ├── Login.jsx
 │   |   |   │   └── Register.jsx
@@ -143,6 +148,8 @@ ases/
 |   |   |   └── evaluation.routes.js
 |   |   |    
 │   │   ├── services/                  # Business logic layer
+│   │   │   ├── grade.service.js            
+│   │   │   └── plagiarism.service.js 
 │   │   │
 │   │   ├── utils/
 │   │   │   ├── ApiError.js            # Custom error class with status code

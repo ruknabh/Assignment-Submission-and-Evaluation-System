@@ -1,11 +1,21 @@
 import { z } from 'zod';
 
-// Allowed file type entries — lowercase strings like "pdf", "zip", "py"
-const fileTypeSchema = z
-  .string()
-  .min(1)
-  .max(10)
-  .regex(/^[a-z0-9]+$/, 'File type must be lowercase alphanumeric e.g. pdf, zip, py');
+// Validates a date string from either:
+// - datetime-local input: "2025-12-01T23:59" (no seconds, no Z)
+// - ISO string: "2025-12-01T23:59:00Z"
+// Converts both to a real Date and checks it's valid and in the future
+const futureDateString = (isEdit) =>
+  z
+    .string()
+    .min(1, 'Due date is required')
+    .refine(
+      (val) => !isNaN(new Date(val).getTime()),
+      { message: 'Due date must be a valid date' }
+    )
+    .refine(
+      (val) => isEdit || new Date(val) > new Date(),
+      { message: 'Due date must be in the future' }
+    );
 
 export const createAssignmentSchema = z.object({
   title: z
@@ -25,16 +35,16 @@ export const createAssignmentSchema = z.object({
     .int('max_marks must be a whole number')
     .positive('max_marks must be greater than 0'),
 
-  due_date: z
-    .string()
-    .datetime({ message: 'due_date must be a valid ISO 8601 datetime e.g. 2025-12-01T23:59:00Z' })
-    .refine(
-      (val) => new Date(val) > new Date(),
-      { message: 'due_date must be in the future' }
-    ),
+  due_date: futureDateString(false),
 
   allowed_file_types: z
-    .array(fileTypeSchema)
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(10)
+        .regex(/^[a-z0-9]+$/, 'File type must be lowercase alphanumeric')
+    )
     .min(1, 'At least one file type must be allowed')
     .max(10, 'Cannot allow more than 10 file types')
     .default(['pdf']),
@@ -69,17 +79,17 @@ export const updateAssignmentSchema = z
       .positive()
       .optional(),
 
-    due_date: z
-      .string()
-      .datetime({ message: 'due_date must be a valid ISO 8601 datetime' })
-      .refine(
-        (val) => new Date(val) > new Date(),
-        { message: 'due_date must be in the future' }
-      )
-      .optional(),
+    // On edit, due_date can be any valid date (past or future — teacher's choice)
+    due_date: futureDateString(true).optional(),
 
     allowed_file_types: z
-      .array(fileTypeSchema)
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(10)
+          .regex(/^[a-z0-9]+$/)
+      )
       .min(1)
       .max(10)
       .optional(),

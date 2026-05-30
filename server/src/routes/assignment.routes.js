@@ -5,13 +5,14 @@ import {
   getAllAssignmentsHandler,
   getAssignmentByIdHandler,
   updateAssignmentHandler,
-  deleteAssignmentHandler,
+  deleteAssignmentHandler,               
 } from '../controllers/assignment.controller.js';
 import authenticate from '../middleware/authenticate.js';
 import requireRole from '../middleware/requireRole.js';
 import {
   submitAssignment,
   getSubmissionsByAssignmentHandler,
+  checkPlagiarismHandler,
 } from '../controllers/submission.controller.js';
 import upload from '../config/multer.js';
 
@@ -51,6 +52,13 @@ router.get(
   '/:assignmentId/submissions',
   requireRole('teacher', 'admin'),
   getSubmissionsByAssignmentHandler
+);
+
+// Teacher/admin runs plagiarism check for an assignment
+router.post(
+  '/:assignmentId/plagiarism-check',
+  requireRole('teacher', 'admin'),
+  checkPlagiarismHandler
 );
 
 

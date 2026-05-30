@@ -2,21 +2,102 @@ import { useEffect, useState }          from 'react';
 import { useParams, useNavigate }       from 'react-router-dom';
 import toast                            from 'react-hot-toast';
 import { getAssignmentByIdApi }         from '../../api/assignment.api.js';
-import { getSubmissionsByAssignmentApi }from '../../api/submission.api.js';
+import { getSubmissionsByAssignmentApi, checkPlagiarismApi } from '../../api/submission.api.js';
 import { getEvaluationsByAssignmentApi }from '../../api/evaluation.api.js';
 import StatusBadge                      from '../../components/StatusBadge.jsx';
 import PlagiarismBadge                  from '../../components/PlagiarismBadge.jsx';
 import { formatDate, formatFileSize }   from '../../utils/helpers.js';
 
+// Plagiarism results panel — shown below table after check runs
+const PlagiarismPanel = ({ results, onClose }) => {
+  if (!results || results.length === 0) return null;
+
+  const checked = results.filter((r) => !r.skipped);
+  const skipped = results.filter((r) =>  r.skipped);
+
+  return (
+    <div className="mt-4 bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <div>
+          <h3 className="text-base font-semibold text-gray-950">
+            Plagiarism Check Results
+          </h3>
+          <p className="text-xs text-gray-400 mt-0.5">
+            {checked.length} checked · {skipped.length} skipped (binary files)
+          </p>
+        </div>
+        <button
+          onClick={onClose}
+          className="text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      {checked.length === 0 ? (
+        <div className="px-5 py-8 text-center">
+          <p className="text-sm text-gray-500">
+            No text-based files found. Plagiarism check only works for text files
+            (py, java, txt, js, etc.)
+          </p>
+        </div>
+      ) : (
+        <div className="divide-y divide-gray-50">
+          {checked
+            .sort((a, b) => b.highestSimilarity - a.highestSimilarity)
+            .map((result) => (
+              <div key={result.submissionId} className="px-5 py-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-950">
+                    Submission {result.submissionId.slice(0, 8)}...
+                  </p>
+                  <PlagiarismBadge score={result.highestSimilarity} />
+                </div>
+
+                {result.comparisons.length > 0 && result.highestSimilarity > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {result.comparisons
+                      .filter((c) => c.score > 0)
+                      .slice(0, 3)
+                      .map((c) => (
+                        <div key={c.againstSubmissionId}
+                          className="flex items-center justify-between text-xs text-gray-500">
+                          <span>
+                            vs {c.againstSubmissionId.slice(0, 8)}...
+                          </span>
+                          <span className={`font-medium ${
+                            c.score > 60 ? 'text-red-600' :
+                            c.score > 30 ? 'text-amber-600' :
+                            'text-green-600'
+                          }`}>
+                            {c.score}% similar
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+            ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const SubmissionsList = () => {
   const { assignmentId } = useParams();
   const navigate = useNavigate();
 
-  const [assignment,  setAssignment]  = useState(null);
-  const [submissions, setSubmissions] = useState([]);
-  const [evaluations, setEvaluations] = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [error,       setError]       = useState(null);
+  const [assignment,       setAssignment]       = useState(null);
+  const [submissions,      setSubmissions]      = useState([]);
+  const [evaluations,      setEvaluations]      = useState([]);
+  const [loading,          setLoading]          = useState(true);
+  const [error,            setError]            = useState(null);
+  const [checkingPlagiarism, setCheckingPlagiarism] = useState(false);
+  const [plagiarismResults,  setPlagiarismResults]  = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -41,13 +122,11 @@ const SubmissionsList = () => {
     fetchData();
   }, [assignmentId]);
 
-  // O(1) lookup
   const evalMap = evaluations.reduce((acc, e) => {
     acc[e.submission_id] = e;
     return acc;
   }, {});
 
-  // Fixed: passes fileName so downloaded file has correct name
   const handleDownload = (submissionId, fileName) => {
     const token = localStorage.getItem('ases_token');
     const url   = `${import.meta.env.VITE_API_URL}/submissions/${submissionId}/file`;
@@ -56,11 +135,33 @@ const SubmissionsList = () => {
       .then((blob) => {
         const link    = document.createElement('a');
         link.href     = URL.createObjectURL(blob);
-        link.download = fileName || 'submission'; // ← was '' before
+        link.download = fileName || 'submission';
         link.click();
         URL.revokeObjectURL(link.href);
       })
       .catch(() => toast.error('Failed to download file'));
+  };
+
+  const handleCheckPlagiarism = async () => {
+    if (submissions.length < 2) {
+      toast.error('Need at least 2 submissions to check plagiarism');
+      return;
+    }
+    try {
+      setCheckingPlagiarism(true);
+      setPlagiarismResults(null);
+      const res = await checkPlagiarismApi(assignmentId);
+      if (res.results.length === 0) {
+        toast('No text files found to compare', { icon: 'ℹ️' });
+      } else {
+        toast.success(`Plagiarism check complete — ${res.total_checked} files compared`);
+        setPlagiarismResults(res.results);
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Plagiarism check failed');
+    } finally {
+      setCheckingPlagiarism(false);
+    }
   };
 
   if (loading) {
@@ -106,18 +207,54 @@ const SubmissionsList = () => {
 
       {/* Header card */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-6">
-        <div className="flex items-start justify-between">
+        <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-xl font-semibold text-gray-950">{assignment.title}</h1>
             <p className="text-sm text-gray-500 mt-1">{assignment.course_name}</p>
           </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-gray-950">
-              {submissions.length} submissions
-            </p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              Due: {formatDate(assignment.due_date)}
-            </p>
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Plagiarism check button */}
+            <button
+              onClick={handleCheckPlagiarism}
+              disabled={checkingPlagiarism || submissions.length < 2}
+              title={submissions.length < 2
+                ? 'Need at least 2 submissions'
+                : 'Check for plagiarism (text files only)'}
+              className="flex items-center gap-1.5 border border-amber-200 text-amber-700
+                hover:bg-amber-50 disabled:opacity-40 disabled:cursor-not-allowed
+                text-xs font-medium rounded-lg px-3 py-2 transition-colors"
+            >
+              {checkingPlagiarism ? (
+                <>
+                  <svg className="animate-spin h-3.5 w-3.5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10"
+                      stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor"
+                      d="M4 12a8 8 0 018-8v8z"/>
+                  </svg>
+                  Checking...
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0
+                         00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2
+                         2 0 012 2m-6 9l2 2 4-4"/>
+                  </svg>
+                  Check Plagiarism
+                </>
+              )}
+            </button>
+            <div className="text-right">
+              <p className="text-sm font-medium text-gray-950">
+                {submissions.length} submissions
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                Due: {formatDate(assignment.due_date)}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -146,7 +283,7 @@ const SubmissionsList = () => {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Submissions table */}
       {submissions.length === 0 ? (
         <div className="flex items-center justify-center h-40
           bg-white rounded-xl border border-gray-100 shadow-sm">
@@ -172,7 +309,6 @@ const SubmissionsList = () => {
                 return (
                   <tr key={sub.id} className="hover:bg-gray-50 transition-colors">
 
-                    {/* Student */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-7 h-7 rounded-full bg-green-100 flex items-center
@@ -188,7 +324,6 @@ const SubmissionsList = () => {
                       </div>
                     </td>
 
-                    {/* Submitted */}
                     <td className="px-5 py-4">
                       <p className="text-sm text-gray-700">
                         {formatDate(sub.submitted_at)}
@@ -196,17 +331,14 @@ const SubmissionsList = () => {
                       {sub.is_late && <StatusBadge status="late" />}
                     </td>
 
-                    {/* Size */}
                     <td className="px-5 py-4 text-sm text-gray-500">
                       {formatFileSize(sub.file_size_kb)}
                     </td>
 
-                    {/* Status */}
                     <td className="px-5 py-4">
                       <StatusBadge status={sub.status} />
                     </td>
 
-                    {/* Grade */}
                     <td className="px-5 py-4">
                       {evaluation ? (
                         <div>
@@ -226,7 +358,6 @@ const SubmissionsList = () => {
                       )}
                     </td>
 
-                    {/* Actions */}
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-2">
                         <button
@@ -263,6 +394,14 @@ const SubmissionsList = () => {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Plagiarism results panel — shown after check runs */}
+      {plagiarismResults && (
+        <PlagiarismPanel
+          results={plagiarismResults}
+          onClose={() => setPlagiarismResults(null)}
+        />
       )}
     </div>
   );

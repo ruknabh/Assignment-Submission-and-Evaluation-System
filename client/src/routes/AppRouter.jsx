@@ -1,43 +1,37 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute.jsx';
 
-// Auth pages
 import Login    from '../pages/auth/Login.jsx';
 import Register from '../pages/auth/Register.jsx';
+import NotFound from '../pages/NotFound.jsx';
 
-// Layouts
 import StudentLayout from '../layouts/StudentLayout.jsx';
 import TeacherLayout from '../layouts/TeacherLayout.jsx';
 import AdminLayout   from '../layouts/AdminLayout.jsx';
 
-// Student pages
-import StudentDashboard    from '../pages/student/Dashboard.jsx';
-import CourseView          from '../pages/student/CourseView.jsx';
-import SubmitAssignment    from '../pages/student/SubmitAssignment.jsx';
+import StudentDashboard  from '../pages/student/Dashboard.jsx';
+import CourseView        from '../pages/student/CourseView.jsx';
+import SubmitAssignment  from '../pages/student/SubmitAssignment.jsx';
 
-// Teacher pages
-import TeacherDashboard    from '../pages/teacher/Dashboard.jsx';
-import CourseManage        from '../pages/teacher/CourseManage.jsx';
-import AssignmentCreate    from '../pages/teacher/AssignmentCreate.jsx';
-import SubmissionsList     from '../pages/teacher/SubmissionsList.jsx';
-import EvaluationView      from '../pages/teacher/EvaluationView.jsx';
-import Analytics           from '../pages/teacher/Analytics.jsx';
+import TeacherDashboard  from '../pages/teacher/Dashboard.jsx';
+import CourseManage      from '../pages/teacher/CourseManage.jsx';
+import AssignmentCreate  from '../pages/teacher/AssignmentCreate.jsx';
+import SubmissionsList   from '../pages/teacher/SubmissionsList.jsx';
+import EvaluationView    from '../pages/teacher/EvaluationView.jsx';
+import Analytics         from '../pages/teacher/Analytics.jsx';
 
-// Admin pages
-import AdminDashboard      from '../pages/admin/Dashboard.jsx';
-import EnrollmentManager   from '../pages/admin/EnrollmentManager.jsx';
+import AdminDashboard    from '../pages/admin/Dashboard.jsx';
+import EnrollmentManager from '../pages/admin/EnrollmentManager.jsx';
 
 const AppRouter = () => {
   return (
     <Routes>
-      {/* Public routes */}
+      {/* Public */}
       <Route path="/login"    element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/"         element={<Navigate to="/login" replace />} />
 
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-
-      {/* Student routes */}
+      {/* Student */}
       <Route
         path="/student"
         element={
@@ -51,7 +45,7 @@ const AppRouter = () => {
         <Route path="assignments/:assignmentId/submit" element={<SubmitAssignment />} />
       </Route>
 
-      {/* Teacher routes */}
+      {/* Teacher */}
       <Route
         path="/teacher"
         element={
@@ -69,7 +63,7 @@ const AppRouter = () => {
         <Route path="courses/:courseId/analytics"                 element={<Analytics />} />
       </Route>
 
-      {/* Admin routes */}
+      {/* Admin */}
       <Route
         path="/admin"
         element={
@@ -82,8 +76,8 @@ const AppRouter = () => {
         <Route path="enrollments" element={<EnrollmentManager />} />
       </Route>
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* 404 — replaces silent redirect to login */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 };

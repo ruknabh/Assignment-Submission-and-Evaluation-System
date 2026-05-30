@@ -13,23 +13,44 @@ const isPastDue = (dueDate) => new Date() > new Date(dueDate);
 // Inline grade panel — shown when assignment is evaluated/returned
 const GradePanel = ({ evaluation, maxMarks, onDownload }) => {
   if (!evaluation) return null;
+  if (evaluation.marks_obtained === undefined || evaluation.marks_obtained === null) return null;
 
   const percentage = maxMarks > 0
     ? ((evaluation.marks_obtained / maxMarks) * 100).toFixed(1)
     : 0;
 
+  const grade = evaluation.letter_grade;
+
+  // These are intentional — red is only for F, not for missing grade
   const gradeColor =
-    evaluation.letter_grade === 'A' ? 'text-green-700'  :
-    evaluation.letter_grade === 'B' ? 'text-blue-700'   :
-    evaluation.letter_grade === 'C' ? 'text-amber-700'  :
-    evaluation.letter_grade === 'D' ? 'text-orange-700' :
-    'text-red-700';
+    grade === 'A' ? 'text-green-700'  :
+    grade === 'B' ? 'text-blue-700'   :
+    grade === 'C' ? 'text-amber-700'  :
+    grade === 'D' ? 'text-orange-700' :
+    grade === 'F' ? 'text-red-700'    :
+    'text-green-700'; // default to green — grade exists if we got here
+
+  const cardStyle =
+    grade === 'A' ? 'bg-green-50  border-green-200'  :
+    grade === 'B' ? 'bg-blue-50   border-blue-200'   :
+    grade === 'C' ? 'bg-amber-50  border-amber-200'  :
+    grade === 'D' ? 'bg-orange-50 border-orange-200' :
+    grade === 'F' ? 'bg-red-50    border-red-200'    :
+    'bg-green-50 border-green-200'; // default green
+
+  const dividerColor =
+    grade === 'A' ? 'border-green-200'  :
+    grade === 'B' ? 'border-blue-200'   :
+    grade === 'C' ? 'border-amber-200'  :
+    grade === 'D' ? 'border-orange-200' :
+    grade === 'F' ? 'border-red-200'    :
+    'border-green-200';
 
   return (
-    <div className="mt-4 pt-4 border-t border-gray-100 bg-green-50
-      rounded-lg p-4 border">
+    <div className={`mt-4 rounded-lg p-4 border ${cardStyle}`}>
+
       <div className="flex items-center justify-between mb-2">
-        <p className="text-xs font-semibold text-green-700 uppercase tracking-wide">
+        <p className={`text-xs font-semibold uppercase tracking-wide ${gradeColor}`}>
           Your Grade
         </p>
         {onDownload && (
@@ -38,7 +59,8 @@ const GradePanel = ({ evaluation, maxMarks, onDownload }) => {
             className="flex items-center gap-1 text-xs text-blue-600
               hover:underline font-medium"
           >
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
@@ -52,15 +74,19 @@ const GradePanel = ({ evaluation, maxMarks, onDownload }) => {
           {evaluation.marks_obtained}
         </span>
         <span className="text-sm text-gray-500">/ {maxMarks}</span>
-        <span className={`text-2xl font-bold ml-2 ${gradeColor}`}>
-          {evaluation.letter_grade}
-        </span>
+        {grade && (
+          <span className={`text-2xl font-bold ml-2 ${gradeColor}`}>
+            {grade}
+          </span>
+        )}
         <span className="text-sm text-gray-400 ml-1">({percentage}%)</span>
       </div>
 
       {evaluation.comment && (
-        <div className="mt-3 pt-3 border-t border-green-200">
-          <p className="text-xs font-medium text-green-700 mb-1">Teacher's feedback</p>
+        <div className={`mt-3 pt-3 border-t ${dividerColor}`}>
+          <p className={`text-xs font-medium mb-1 ${gradeColor}`}>
+            Teacher's feedback
+          </p>
           <p className="text-sm text-gray-700">{evaluation.comment}</p>
         </div>
       )}
