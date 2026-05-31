@@ -29,8 +29,7 @@ ases/
 │   |   |   ├── enrollment.api.js     ← request, approve, reject, direct enroll 
 │   |   |   ├── assignment.api.js     ← CRUD assignments 
 │   |   |   ├── submission.api.js     ← submit file, list, download 
-│   |   |   └── evaluation.api.js     ← grade, return, view grades  
-|   |   |                    
+│   |   |   └── evaluation.api.js     ← grade, return, view grades                    
 |   |   |                       
 |   |   ├── components/                    
 |   |   |   ├── EmptyState.jsx                    
@@ -43,11 +42,9 @@ ases/
 |   |   |   ├── PlagiarismBadge.jsx                    
 |   |   |   ├── SidebarLink.jsx                    
 |   |   |   └── StatusBadge.jsx                    
-|   |   |                       
-|   |   |                    
+|   |   |                                        
 │   │   ├── context/
-│   |   |   └── AuthContext.jsx       ← user state, login/logout, token in localStorage      
-|   |   |      
+│   |   |   └── AuthContext.jsx       ← user state, login/logout, token in localStorage           
 |   |   |                   
 │   │   ├── hooks/
 |   |   |   ├── useAuth.js            ← consumes AuthContext cleanly
@@ -116,7 +113,6 @@ ases/
 │   │   │   ├── multer.js              # File upload config
 |   |   |   └── storage.js             # File save/delete/resolve
 |   |   |
-|   |   |
 │   │   ├── controllers/
 │   │   │   ├── auth.controller.js     # Register, login, getMe logic
 │   │   │   ├── course.controller.js
@@ -176,7 +172,6 @@ ases/
 │
 ├── .env
 ├── .gitignore
-├── docker-compose.yml
 └── README.md
 ```
 
