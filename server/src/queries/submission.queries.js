@@ -77,7 +77,8 @@ export const getSubmissionById = async (id) => {
 // Get all submissions for a specific assignment — teacher/admin use this
 export const getSubmissionsByAssignment = async (assignment_id) => {
   const result = await pool.query(
-    `SELECT s.id, s.file_name, s.file_size_kb, s.submitted_at, s.is_late, s.status,
+    `SELECT s.id, s.file_name, s.file_path, s.file_size_kb,
+            s.submitted_at, s.is_late, s.status,
             u.id AS student_id, u.full_name AS student_name, u.email AS student_email
      FROM submissions s
      JOIN users u ON s.student_id = u.id
